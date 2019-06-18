@@ -1,23 +1,8 @@
-let nextTodoId = 0;
+export const resetClock = () => ({ type: "reset-clock" });
+export const incrementMilliseconds = () => ({ type: "increment-milliseconds" });
+export const decrementMilliseconds = () => ({ type: "decrement-milliseconds" });
 
-export const addTodo = (text) => {
-    return {
-        type: 'ADD_TODO',
-        id: (nextTodoId++).toString(),
-        text
-    }
-};
-
-export const setVisibilityFilter = (filter) => {
-    return {
-        type: 'SET_VISIBILITY_FILTER',
-        filter
-    }
-};
-
-export const toggleTodo = (id) => {
-    return {
-        type: 'TOGGLE_TODO',
-        id
-    }
-};
+// saga actions
+export const startClock = () => ({ type: "start-clock" });
+export const pauseClock = () => ({ type: "pause-clock" });
+export const rewindClock = () => ({ type: "rewind-clock" });

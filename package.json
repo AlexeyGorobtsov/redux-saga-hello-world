@@ -30,6 +30,8 @@
     "webpack-dev-middleware": "^3.6.2"
   },
   "dependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.4.4"
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-transform-runtime": "^7.4.4",
+    "redux-saga": "^1.0.3"
   }
 }
