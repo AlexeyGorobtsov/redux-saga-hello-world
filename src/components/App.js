@@ -9,13 +9,13 @@ import {
     pauseClock,
     rewindClock
 } from "../actions";
+import {CLOCK_HANDS, STROKE_WIDTH} from "../config";
 
 class Clock extends Component {
     render() {
         const {
+            hands,
             milliseconds,
-            incrementMilliseconds,
-            decrementMilliseconds,
             resetClock,
             startClock,
             pauseClock,
@@ -23,40 +23,68 @@ class Clock extends Component {
         } = this.props;
 
         return (
-            <div>
-                <svg
-                    onClick={ incrementMilliseconds }
-                    onDoubleClick={ resetClock }
-                    onMouseLeave={ decrementMilliseconds }
-                    className={'clock'}
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox={'0 0 100 100'}
-                    width={'500'}
-                >
-                    <circle
-                        cx={'50'}
-                        cy={'50'}
-                        r={30}
-                        stroke={'rgba(1, 1, 1, 1)'}
-                        fill={'orange'}
-                    />
-                </svg>
-                <p>{ milliseconds }</p>
-                <p><button type={'button'} onClick={startClock}>Start Clock</button></p>
-                <p><button type={'button'} onClick={pauseClock}>Pause Clock</button></p>
-                <p><button type={'button'} onClick={rewindClock}>Rewind Clock</button></p>
-            </div>
-        )
+
+            <svg
+                onMouseEnter={startClock}
+                onMouseLeave={rewindClock}
+                onDoubleClick={resetClock}
+                onClick={pauseClock}
+                className={'clock'}
+                xmlns={'http://www.w3.org/2000/svg'}
+                viewBox={'0 0 100 100'}
+                width={'500'}
+            >{hands.map((hand, i) => {
+                const {radius, circumference, position, alpha} = hand;
+                return <circle
+                    key={i}
+                    cx={'50'}
+                    cy={'50'}
+                    r={radius}
+                    stroke={`rgba(1, 1, 1, ${alpha})`}
+                    fill={'none'}
+                    strokeWidth={STROKE_WIDTH}
+                    strokeDasharray={circumference}
+                    strokeDashoffset={position}
+                />
+            })
+            }
+            </svg>
+        );
     }
 }
 
+const mapStateToProps = state => {
+    const remainingTime = state.milliseconds;
+
+    const getTicks = (hands, timeRemaining) => {
+        const [hand, ...tailHands] = hands;
+        hand.ticks = Math.floor(timeRemaining / hand.ms);
+
+        return tailHands.length ? [hand, ...getTicks(tailHands, timeRemaining % hand.ms)] : [hand]
+    };
+
+    const hands = getTicks(CLOCK_HANDS, remainingTime)
+        .map((hand, i) => {
+            const offset = state.milliseconds >= hand.ms ? 1 : 0;
+            const position = hand.circumference - ((hand.ticks + offset) / hand.maxTicks * hand.circumference)
+
+            return {
+                ...hand,
+                position
+            }
+        });
+
+    return {
+        hands
+    }
+};
+
 export default connect(
-    state => ({milliseconds: state.milliseconds}),
-    ({
-        incrementMilliseconds,
-        decrementMilliseconds,
-        resetClock,
+    mapStateToProps,
+    {
         startClock,
-        pauseClock,
-        rewindClock
-    }))(Clock);
+        rewindClock,
+        resetClock,
+        pauseClock
+    }
+)(Clock);
